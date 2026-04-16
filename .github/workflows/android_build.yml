@@ -18,12 +18,11 @@ jobs:
           distribution: 'temurin'
       - name: Install dependencies
         run: npm install
-      - name: Create missing Cordova files
+      - name: Fix Cordova and Sync
         run: |
           mkdir -p android/capacitor-cordova-android-plugins
           echo "ext { }" > android/capacitor-cordova-android-plugins/cordova.variables.gradle
-      - name: Capacitor Sync
-        run: npx cap sync android
+          npx cap sync android
       - name: Build with Gradle
         run: |
           cd android
