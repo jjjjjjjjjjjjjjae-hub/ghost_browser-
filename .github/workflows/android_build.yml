@@ -18,16 +18,17 @@ jobs:
           distribution: 'temurin'
       - name: Install dependencies
         run: npm install
-      - name: Fix and Sync
+      - name: Capacitor Sync
+        run: npx cap sync android
+      - name: Force Create Cordova Files
         run: |
           mkdir -p android/capacitor-cordova-android-plugins
           echo "ext { }" > android/capacitor-cordova-android-plugins/cordova.variables.gradle
-          npx cap sync android
       - name: Build with Gradle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace --info
+          ./gradlew assembleDebug
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
