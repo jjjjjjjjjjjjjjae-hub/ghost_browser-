@@ -20,14 +20,18 @@ jobs:
         run: npm install
       - name: Capacitor Sync
         run: npx cap sync android
-      - name: Force Create Cordova Files
+      - name: Clean and Fix Gradle
         run: |
-          mkdir -p android/capacitor-cordova-android-plugins
-          echo "ext { }" > android/capacitor-cordova-android-plugins/cordova.variables.gradle
+          cd android
+          # Қате шығарып жатқан файлдарды тазалап, бос файлдармен алмастыру
+          mkdir -p capacitor-cordova-android-plugins
+          echo "ext { }" > capacitor-cordova-android-plugins/cordova.variables.gradle
+          # Негізгі файлдағы қате жолды өшіру
+          sed -i '/cordova.variables.gradle/d' app/capacitor.build.gradle || true
+          chmod +x gradlew
       - name: Build with Gradle
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
       - name: Upload APK
         uses: actions/upload-artifact@v4
