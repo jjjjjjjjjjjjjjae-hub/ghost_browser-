@@ -16,21 +16,23 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
-      - name: Build Web Assets
+      - name: Fix Capacitor & Build
         run: |
-          # Егер build скрипті болмаса, қате бермеуі үшін
-          npm run build || mkdir -p www
-      - name: Hard Patch Gradle & Build
-        run: |
-          mkdir -p android/capacitor-cordova-android-plugins/
-          touch android/capacitor-cordova-android-plugins/cordova.variables.gradle
-          # Gradle Property-ді күштеп енгізу
-          echo "ext { cdvPluginPostBuildExtras = [] }" >> android/build.gradle
-          cd android && chmod +x gradlew
-          # -x lint: Тексерістерді өшіріп, тікелей жинау
-          ./gradlew assembleDebug -x lint --stacktrace
+          # 1. Capacitor-дың негізгі байланыстарын қалпына келтіру
+          cd android
+          echo "include ':app'" > settings.gradle
+          echo "project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')" >> settings.gradle
+          echo "include ':capacitor-android'" >> settings.gradle
+          
+          # 2. Cordova-ны өшіру, бірақ Capacitor-ға тиіспеу
+          sed -i '/apply from:.*cordova/d' app/build.gradle
+          sed -i '/project(":capacitor-cordova-android-plugins")/d' app/build.gradle
+          
+          # 3. Билдті бастау
+          chmod +x gradlew
+          ./gradlew assembleDebug -x lint
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: Ghost-v2-Final
           path: android/app/build/outputs/apk/debug/app-debug.apk
