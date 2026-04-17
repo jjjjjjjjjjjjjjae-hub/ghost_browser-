@@ -22,14 +22,18 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Fix Cordova & Build APK
+      - name: Pure Capacitor Build
         run: |
-          # Web Assets (www) дайын деп есептейміз
+          # Cordova тәуелділігін Gradle-дан күштеп алып тастау
+          sed -i '/apply from: ".*cordova.variables.gradle"/d' android/app/build.gradle
+          sed -i '/implementation project(":capacitor-cordova-android-plugins")/d' android/app/build.gradle
+          sed -i '/include ":capacitor-cordova-android-plugins"/d' android/settings.gradle
+          
+          # Төтенше жағдай үшін бос файлдар жасау
           mkdir -p android/capacitor-cordova-android-plugins/
           touch android/capacitor-cordova-android-plugins/cordova.variables.gradle
-          if [ -f android/build.gradle ]; then
-            echo "ext { cdvPluginPostBuildExtras = [] }" >> android/build.gradle
-          fi
+          
+          # Билдті бастау
           cd android && chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Upload Artifact
