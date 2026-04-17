@@ -1,0 +1,43 @@
+name: Ghost Core Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install
+
+      - name: Build & Clean Gradle
+        run: |
+          # Android папкасындағы барлық Cordova сілтемелерін түбімен жою
+          cd android
+          echo "include ':app'" > settings.gradle
+          
+          # build.gradle файлын ең қарапайым күйге келтіру
+          sed -i '/apply from:.*cordova/d' app/build.gradle
+          sed -i '/project(":capacitor-cordova-android-plugins")/d' app/build.gradle
+          
+          # Gradle кэшін тазалап, жинау
+          chmod +x gradlew
+          ./gradlew clean assembleDebug
+
+      - name: Export
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ghost-v2-Final-Release
+          path: android/app/build/outputs/apk/debug/app-debug.apk
