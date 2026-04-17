@@ -27,16 +27,11 @@ jobs:
 
       - name: Fix Cordova & Build APK
         run: |
-          # Gradle қатесін (Cordova Missing Script) билд кезінде автоматты түрде түзеу
           mkdir -p android/capacitor-cordova-android-plugins/
           touch android/capacitor-cordova-android-plugins/cordova.variables.gradle
-          
-          # Gradle Property Injection (cdvPluginPostBuildExtras қатесін жою)
           if [ -f android/build.gradle ]; then
             echo "ext { cdvPluginPostBuildExtras = [] }" >> android/build.gradle
           fi
-          
-          # Gradle билдті бастау
           cd android && chmod +x gradlew && ./gradlew assembleDebug
 
       - name: Upload Artifact
